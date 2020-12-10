@@ -1,14 +1,14 @@
 # Introduction
 
-It is a small tool to conver encoding that I wrote long long time ago.
+It is a small tool to convert encoding, which I wrote long long time ago.
 
-It's useful to me and someone may like it, so I extract it from old code repo and build it to a standalone tool.
+It's useful to me and someone may need it too, so I extract it from old code repo and build it to a standalone tool.
 
 ![snapshot](snapshot.png)
 
-Please star it if you like it.
+Please star it if you like it :)
 
-Please raise issue to me if you want new functions.
+You can raise issue to me if you want new functions.
 
 Thanks, 
 Walter
