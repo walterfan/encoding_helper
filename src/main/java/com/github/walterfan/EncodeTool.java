@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -465,6 +467,31 @@ public class EncodeTool extends SwingTool {
         // handlerMap.put("DESede", new EncryptHandler());
         // handlerMap.put("Blowfish", new EncryptHandler());
 
+        handlerMap.put("NTPTimestamp-String", new EncodeHandler() {
+            public String convert(String text) throws Exception {
+                String[] arr = text.trim().split("\\.");
+
+                long ntpSeconds = Long.valueOf(arr[0]);
+                long ntpFraction = 0;
+                if(arr.length > 1) {
+                    ntpFraction = Long.valueOf(arr[1]);
+                }
+
+                ntpSeconds = (ntpSeconds << 32) | ntpFraction;
+
+                org.apache.commons.net.ntp.TimeStamp ntpTimstamp = new org.apache.commons.net.ntp.TimeStamp(ntpSeconds);
+                java.util.Date now = ntpTimstamp.getDate();
+                return DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(now);
+            }
+
+            public String decode(String text) throws Exception {
+                Instant instant = Instant.parse(text);
+                org.apache.commons.net.ntp.TimeStamp ntpTimstamp = new org.apache.commons.net.ntp.TimeStamp(Date.from(instant));
+
+                return String.valueOf(ntpTimstamp.getSeconds() + "." + ntpTimstamp.getFraction());
+            }
+        });
+
     }
 
 	private void arrange() {
@@ -726,7 +753,6 @@ public class EncodeTool extends SwingTool {
 	 */
 	public static void main(String[] args) {
 		SwingUtils.run(new EncodeTool("Encoding tool v1.0"), 800, 600);
-
 	}
 
 }
