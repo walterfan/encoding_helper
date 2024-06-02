@@ -30,12 +30,11 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 import java.util.zip.CRC32;
-
 
 interface ConvertHandler {
     String convert(String text) throws Exception;
@@ -55,20 +54,35 @@ public class EncodeTool extends SwingTool {
 	private static final long serialVersionUID = 1L;
 	private static final Color DEFAULT_COLOR = new Color(0x99,0xFF,0xCC);
     public static int TEXT_SIZE = 8;
-	
+    public static String DEFAULT_KV = "abcdefghijklmnop0123456789abcdef";
+
     private class EncryptHandler implements EncodeHandler {
 
         public String convert(String text) throws Exception {
-            String key = StringUtils.trim(txtKey.getText());
+
+            String key_iv = StringUtils.trim(txtKey.getText());
+            if (key_iv.length() < 16 && key_iv.length() % 16 != 0) {
+                throw new Exception("invalid AES Key length(128, 192, or 256 bits)");
+            }
+
+            String key = key_iv.substring(0, 16);
+            String iv = key_iv.substring(16, key_iv.length());
+
             String algorithm = (String)algorithmList.getSelectedItem() ;
             String spec = buildAlgorithmSpec(algorithm);
             Encryptor enc = new Encryptor(spec);
-            return EncodeUtils.byte2Hex((enc.encode(text.getBytes(), key.getBytes())));
+            return new String(EncodeUtils.encodeBase64((enc.encode(text.getBytes(), key.getBytes(), iv.getBytes()))));
             
         }
         
         public String decode(String text) throws Exception {
-        	String key = StringUtils.trim(txtKey.getText());
+        	String key_iv = StringUtils.trim(txtKey.getText());
+            if (key_iv.length() < 16 && key_iv.length() % 16 != 0) {
+                throw new Exception("invalid AES Key length(128, 192, or 256 bits)");
+            }
+
+            String key = key_iv.substring(0, 16);
+            String iv = key_iv.substring(16, key_iv.length());
             String mode = (String)modeList.getSelectedItem();
             String padding = (String)paddingList.getSelectedItem();
             String algorithm = "AES" ;
@@ -79,7 +93,7 @@ public class EncodeTool extends SwingTool {
             	algorithm = algorithm + "/" + padding;
             }
             Encryptor enc = new Encryptor(algorithm);
-            return new String(enc.decode(EncodeUtils.hex2Byte(text), key.getBytes()));
+            return new String(enc.decode(EncodeUtils.decodeBase64(text.getBytes()), key.getBytes(), iv.getBytes()));
         }
     }
     
@@ -153,25 +167,7 @@ public class EncodeTool extends SwingTool {
     		textArea.setText(ret);
         }
     }
-    
-    private class MakeKeyHandler implements ActionListener {
 
-    	private JTextArea textArea;
-    	public MakeKeyHandler(JTextArea textArea) {
-    		this.textArea = textArea;
-    	}
-        public void actionPerformed(ActionEvent event) {
-        	String algorithm = (String)algorithmList.getSelectedItem() ;
-        	String spec = buildAlgorithmSpec(algorithm);
-        	Encryptor enc = new Encryptor(spec);
-        	try {
-				textArea.setText(new String((enc.makeKey())));
-			} catch (NoSuchAlgorithmException e) {
-				SwingUtils.alert(e.getMessage());
-			}
-        }
-    }
-    
     private class LoadHandler implements ActionListener {
         public void actionPerformed(ActionEvent e) {
         	JFileChooser c = null;
@@ -220,16 +216,14 @@ public class EncodeTool extends SwingTool {
 	
 	private JTextArea txtOutput = new JTextArea(3,28);
 	
-	private JTextArea txtKey = new JTextArea(3,10);
+	private JTextArea txtKey = new JTextArea(DEFAULT_KV, 3,10);
 	
 	private JButton btnEncode = new JButton("encode =>");
 	
 	private JButton btnDecode = new JButton("<= decode");
 	
-	private JButton btnGenKey = new JButton("generate key");
-	
-	private JButton btnMakeKey = new JButton("make key");
-	
+	private JButton btnGenKey = new JButton("generate key+iv");
+
 	private JButton btnMakeInput = new JButton("<- generate input");
 	
 	private JButton btnMakeOutput = new JButton("generate output ->");
@@ -237,28 +231,27 @@ public class EncodeTool extends SwingTool {
 	private JButton btnAbout = new JButton("about");
 	
 	private JButton btnResetInput = new JButton("<- clear input");
-	
+
 	private JButton btnExit = new JButton("exit");
 	
 	private JButton btnResetOutput = new JButton("clear output ->");
 	
-	private JButton btnResetKey = new JButton("clear key");
+	private JButton btnResetKey = new JButton("clear key+iv");
     
-	private JComboBox algorithmList;
+	private JComboBox<String> algorithmList;
+
+	private JComboBox<String> modeList;
 	
-	private JComboBox modeList;
+	private JComboBox<String> paddingList;
 	
-	private JComboBox paddingList;
+	private JComboBox<String> charsList ;
+
+	private JTextField txtCharsCount = new JTextField("32",5);
 	
-	private JComboBox charsList ;
-	
-	private JTextField txtCharsCount = new JTextField("16",5);
-	
-	private Map<String, ConvertHandler> handlerMap
-	    = new TreeMap<String, ConvertHandler>();
-	
+	private Map<String, ConvertHandler> handlerMap = new TreeMap<String, ConvertHandler>();
+
 	public EncodeTool() {
-		this("Encode tool v2.0");
+		this("Encode tool v2.1");
 	}
 	
 	public EncodeTool(String title) {
@@ -584,17 +577,13 @@ public class EncodeTool extends SwingTool {
 		hBox.add(this.btnGenKey);
 		btnGenKey.setToolTipText("generate key by random");
 		btnGenKey.addActionListener(new GenKeyHandler(txtKey));
-		
-//		hBox.add(this.btnMakeKey);
-//		btnMakeKey.setToolTipText("make key by KeyGenerator as specified algorithm");
-//		btnMakeKey.addActionListener(new MakeKeyHandler(txtKey));
-		
+
 		hBox.add(this.btnResetKey);
         btnResetKey.addActionListener(new ClearHandler(txtKey));
         
         hBox.add(this.btnAbout);
 		btnAbout.addActionListener(ActionHandlerFactory.createAboutHandler(
-				this, "About Encoding Tool v1.0", " Wrote by Walter Fan, updated on 07/11/09 ", 320, 100));
+				this, "About Encoding Tool v1.1", " Wrote by Walter Fan, 07/11/09 ", 320, 100));
 		
 		hBox.add(this.btnExit);
 		btnExit.addActionListener(ActionHandlerFactory.createExitHandler());
@@ -617,18 +606,20 @@ public class EncodeTool extends SwingTool {
 		modeList = new JComboBox(vec);
 		modeList.setFont(displayFont);
 		modeList.setEditable(true);
+        modeList.setSelectedIndex(2);
 	}
 	
 	private void initiatePaddingList() {
 		Vector<String> vec = new Vector<String>();
 		vec.add("-- select padding --");
-		vec.add("NoPadding");
+        vec.add("PKCS5Padding");
+        vec.add("NoPadding");
 		vec.add("ISO10126Padding");
-		vec.add("PKCS5Padding");
 		vec.add("SSL3Padding");
 		paddingList = new JComboBox(vec);
 		paddingList.setFont(displayFont);
 		paddingList.setEditable(true);
+        paddingList.setSelectedIndex(1);
 	}
 	
 	
@@ -637,19 +628,11 @@ public class EncodeTool extends SwingTool {
 		for(Map.Entry<String, ConvertHandler> entry: this.handlerMap.entrySet()) {
 		    vec.add(entry.getKey());  
 		}
-        //Collections.sort(vec);
-		/*vec.add("AES encrypt");
-		vec.add("AES decrypt");
-		vec.add("DES encrypt");
-		vec.add("DES decrypt");
-		vec.add("CRC16");
-		vec.add("CRC32");
-		vec.add("RSA");
-		vec.add("DSA");*/
-		       
+
 		algorithmList = new JComboBox(vec);
 		algorithmList.setFont(displayFont);
 		algorithmList.setEditable(true);
+        algorithmList.setSelectedIndex(3);
 		
 	}
 
@@ -658,10 +641,12 @@ public class EncodeTool extends SwingTool {
 		vec.add("-- select chars --");
 		vec.add("Numbers");
 		vec.add("Letters");
+        vec.add("Letters+Numbers");
 		vec.add("Hex numbers");
 		vec.add("ASCII chars");
 		charsList = new JComboBox(vec);
 		charsList.setEditable(true);
+        charsList.setSelectedIndex(3);
 	}
 	
 	public static String getChars(String ctype) {
@@ -671,7 +656,9 @@ public class EncodeTool extends SwingTool {
     		return RandomUtils.NUMBERS;
     	} else if ("Letters".equals(ctype)){
     		return RandomUtils.LETTERS;
-    	} else if ("Hex numbers".equals(ctype)){
+    	} else if ("Letters+Numbers".equals(ctype)){
+    		return RandomUtils.LETTER_NUMBERS;
+        } else if ("Hex numbers".equals(ctype)){
     		return RandomUtils.HEXS;
     	} else if ("ASCII chars".equals(ctype)){
     		return RandomUtils.CHARS;
@@ -718,10 +705,10 @@ public class EncodeTool extends SwingTool {
         JMenu helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
         JMenuItem helpItem = new JMenuItem("Help");
-        helpItem.addActionListener(ActionHandlerFactory.createAboutHandler(
+        helpItem.addActionListener(ActionHandlerFactory.createHelpHandler(
 				this, "Help of Encode Tool v1.0", " Encode and Decode text ", 240, 100));
 
-        
+
         JMenuItem aboutItem = new JMenuItem("About");
         aboutItem.addActionListener(ActionHandlerFactory.createAboutHandler(
 				this, "About Encode Tool v1.0", " Wrote by Walter Fan, updated on 07/11/09 ", 320, 100));
@@ -741,7 +728,7 @@ public class EncodeTool extends SwingTool {
 		if(!StringUtils.contains(padding, "select")) {
 			spec = spec + "/" + padding;
 		}
-		SwingUtils.alert(spec);
+		//SwingUtils.alert(spec);
 		return spec;
 	}
 

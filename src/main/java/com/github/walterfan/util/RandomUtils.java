@@ -13,8 +13,10 @@ public class RandomUtils {
 
     public static final String NUMBERS = "0123456789";
 
+    public static final String LETTER_NUMBERS = LETTERS + NUMBERS;
+
     public static final String HEXS = "0123456789abcdef";
-    
+
     public static final String CHARS ;
 
     public static final String ASCIICHARS ;

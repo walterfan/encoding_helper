@@ -41,37 +41,36 @@ public class Encryptor {
         this.algorithm = algorithm;
     }
 
-    public byte[] encode(byte[] bytes, byte[] kbytes) throws Exception {
-       /* if(aesKey.getBytes().length % ENC_KEY_LEN != 0) {
+    public byte[] encode(byte[] bytes, byte[] kbytes, byte[] iv_bytes) throws Exception {
+        if(kbytes.length % ENC_KEY_LEN != 0) {
             throw new Exception("invalid AES Key length(128, 192, or 256 bits)");
-        }*/
-        
-        SecretKeySpec keySpec = new SecretKeySpec(kbytes, algorithm);
+        }
+        if(iv_bytes.length > 0 && iv_bytes.length != 16) {
+            throw new Exception("invalid IV length(16 bytes)");
+        }
+
+        SecretKeySpec keySpec = new SecretKeySpec(kbytes, AES_ALGORITHM);
         Cipher cipher = Cipher.getInstance(algorithm);
-        if(ENC_CBC_NOPADDING.equals(algorithm)) {
-            AlgorithmParameterSpec paraSpec = new IvParameterSpec(IV_BYTES);
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec, paraSpec);
-        }
-        else {
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-        }
+
+        AlgorithmParameterSpec paraSpec = new IvParameterSpec(iv_bytes);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, paraSpec);
+
         return cipher.doFinal(bytes);
     }
 
-    public byte[] decode(byte[] encryptedBytes, byte[] kbytes) throws Exception {
-    /*    if(aesKey.getBytes().length % ENC_KEY_LEN != 0) {
+    public byte[] decode(byte[] encryptedBytes, byte[] kbytes, byte[] iv_bytes) throws Exception {
+        if(kbytes.length % ENC_KEY_LEN != 0) {
             throw new Exception("invalid AES Key length(128, 192, or 256 bits)");
-        }*/
+        }
+        if(iv_bytes.length > 0 && iv_bytes.length != 16) {
+            throw new Exception("invalid IV length(16 bytes)");
+        }
         Cipher cipher = Cipher.getInstance(algorithm);
-        SecretKeySpec keySpec = new SecretKeySpec(kbytes, algorithm);
-        if(ENC_CBC_NOPADDING.equals(algorithm)) {
-            AlgorithmParameterSpec paraSpec = new IvParameterSpec(IV_BYTES);
-            cipher.init(Cipher.DECRYPT_MODE, keySpec, paraSpec);
-        }
-        else {
-            cipher.init(Cipher.DECRYPT_MODE, keySpec);
-        }
-        
+        SecretKeySpec keySpec = new SecretKeySpec(kbytes, AES_ALGORITHM);
+
+        AlgorithmParameterSpec paraSpec = new IvParameterSpec(iv_bytes);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, paraSpec);
+
         return cipher.doFinal(encryptedBytes);
     }
 
@@ -79,7 +78,7 @@ public class Encryptor {
     	KeyGenerator keygen = KeyGenerator.getInstance(algorithm);
     	SecretKey skey = keygen.generateKey();
     	byte[] raw = skey.getEncoded();
-    	//SecretKeySpec skeySpec = new SecretKeySpec(raw, algorithm);
+
     	return raw;
     }
 
@@ -105,7 +104,7 @@ public class Encryptor {
 
     public Encryptor(String algorithm, byte[] keyBytes, byte[] ivBytes) {
         this.algorithm = algorithm;
-        this.keySpec =  new SecretKeySpec(keyBytes, algorithm);
+        this.keySpec =  new SecretKeySpec(keyBytes, AES_ALGORITHM);
         this.ivParamSpec = new IvParameterSpec(ivBytes);
 
     }
@@ -190,7 +189,7 @@ public class Encryptor {
         KeyGenerator keygen = KeyGenerator.getInstance(algorithm);
         SecretKey skey = keygen.generateKey();
         byte[] raw = skey.getEncoded();
-        return new SecretKeySpec(raw, algorithm);
+        return new SecretKeySpec(raw, AES_ALGORITHM);
     }
 
 
