@@ -162,8 +162,13 @@ public class EncodeTool extends SwingTool {
     	}
         public void actionPerformed(ActionEvent event) {
         	String ctype = (String)charsList.getSelectedItem();
-    		int count = NumberUtils.toInt(txtCharsCount.getText());
-    		String ret = RandomUtils.getRandomChars(getChars(ctype), count);
+            String ret = "";
+            if (ctype.equalsIgnoreCase("uuid")) {
+                ret = RandomUtils.getRandomUuid();
+            } else {
+    		    int count = NumberUtils.toInt(txtCharsCount.getText());
+    		    ret = RandomUtils.getRandomChars(getChars(ctype), count);
+            }
     		textArea.setText(ret);
         }
     }
@@ -222,7 +227,7 @@ public class EncodeTool extends SwingTool {
 	
 	private JButton btnDecode = new JButton("<= decode");
 	
-	private JButton btnGenKey = new JButton("generate key+iv");
+	private JButton btnGenKey = new JButton("generate");
 
 	private JButton btnMakeInput = new JButton("<- generate input");
 	
@@ -236,7 +241,7 @@ public class EncodeTool extends SwingTool {
 	
 	private JButton btnResetOutput = new JButton("clear output ->");
 	
-	private JButton btnResetKey = new JButton("clear key+iv");
+	private JButton btnResetKey = new JButton("clear");
     
 	private JComboBox<String> algorithmList;
 
@@ -565,7 +570,7 @@ public class EncodeTool extends SwingTool {
 		Box hBox = Box.createHorizontalBox();
 		
 		hBox.add(Box.createHorizontalGlue());
-		hBox.add(new JLabel(" Key(as hex): ", JLabel.LEFT));
+		hBox.add(new JLabel(" Random String(key+iv): ", JLabel.LEFT));
 
 		hBox.add(charsList);
 
@@ -644,7 +649,8 @@ public class EncodeTool extends SwingTool {
         vec.add("Letters+Numbers");
 		vec.add("Hex numbers");
 		vec.add("ASCII chars");
-		charsList = new JComboBox(vec);
+        vec.add("UUID");
+		charsList = new JComboBox<String>(vec);
 		charsList.setEditable(true);
         charsList.setSelectedIndex(3);
 	}

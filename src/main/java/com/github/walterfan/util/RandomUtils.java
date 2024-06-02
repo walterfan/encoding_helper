@@ -3,6 +3,7 @@ package com.github.walterfan.util;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -98,6 +99,9 @@ public class RandomUtils {
     	return getRandomChars(LETTERS, size);
     }
 
+    public static String getRandomUuid() {
+    	return UUID.randomUUID().toString();
+    }
 
     public static void main(String[] args) {
     	System.out.println("Random String: " + getRandomChars(8));
