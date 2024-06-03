@@ -4,6 +4,53 @@ It is a small tool to convert encoding, which I wrote long long time ago.
 
 It's useful to me and someone may need it too, so I extract it from old code repo and build it to a standalone tool.
 
+## Functions
+
+### Conversion
+
+* 10-16 number conversion
+* 10-2 number conversion
+
+* Base64 encode/decode
+* Hex-Ascii encode/decode
+* Hex-Base64 encode/decode
+* HTML escape/unescape
+* SQL escape/unescape
+* Timstamp-String conversion
+* NativeString-AsciiString conversion
+* URL encode/decode
+* XML_parameter-Base64 encode/decode
+* Zip-Base64 encode/decode
+* Zip-Base64-with-len encode/decode
+
+### Checksum
+* CRC32 calculation
+* MD2 hash
+* MD5 hash
+* SHA1 hash
+* SHA2 hash
+
+## Generation
+* UUID generation
+* Random string generation
+
+## Encryption
+
+* AES encryption/decryption
+
+    - mode:
+        - CBC
+        - CFB
+        - ECB
+        - OFB
+
+    - padding:
+        - NoPadding
+        - PKCS5Padding
+        - ISO10126Padding
+        - SSL3Padding
+
+
 ![snapshot](snapshot.png)
 
 Please star it if you like it :)
@@ -17,15 +64,24 @@ Walter
 
 1. clone this repo
 
+   ensure you installed jdk and maven
+
 2. cd encoding_helper
 
 3. compile and package, JDK is required
 
-    mvn clean compile assembly:single
+```sh
+mvn package
+```
 
 4. run it
 
-    start.sh or start.bat
+```sh
+# windows
+./target/encoding_helper.exe
+# linux or macos
+./target/encoding_helper
+```
 
 ## Reference
 

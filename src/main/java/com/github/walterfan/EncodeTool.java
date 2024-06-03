@@ -606,8 +606,8 @@ public class EncodeTool extends SwingTool {
 		vec.add("CFB");
 		vec.add("ECB");
 		vec.add("OFB");
-		vec.add("CBC");
-		vec.add("PCBC");
+		vec.add("GCM");
+		
 		modeList = new JComboBox(vec);
 		modeList.setFont(displayFont);
 		modeList.setEditable(true);

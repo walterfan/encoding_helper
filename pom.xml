@@ -9,9 +9,12 @@
   <version>1.0</version>
 
   <name>encoding_helper</name>
-
+  <inceptionYear>2009</inceptionYear>
+  <description>Encoding Conversion, Encryption/Decryption and UUID/Random string generation</description>
   <url>http://www.fanyamin.com</url>
-
+  <organization>
+    <name>Walter's Personal Studio</name>
+  </organization>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -175,7 +178,6 @@
       <artifactId>really-executable-jar-maven-plugin</artifactId>
       <version>1.5.0</version>
       <configuration>
-        <flags>-Xmx1G</flags>
         <programFile>${project.artifactId}</programFile>
       </configuration>
       <executions>
