@@ -68,7 +68,7 @@ public class EncodeTool extends SwingTool {
             String key = key_iv.substring(0, 16);
             String iv = key_iv.substring(16, key_iv.length());
 
-            String algorithm = (String)algorithmList.getSelectedItem() ;
+            String algorithm = (String)algorithmList.getSelectedItem();
             String spec = buildAlgorithmSpec(algorithm);
             Encryptor enc = new Encryptor(spec);
             return new String(EncodeUtils.encodeBase64((enc.encode(text.getBytes(), key.getBytes(), iv.getBytes()))));
@@ -460,7 +460,7 @@ public class EncodeTool extends SwingTool {
             }
         });
 
-        handlerMap.put("AES", new EncryptHandler());
+        handlerMap.put("AES-Base64", new EncryptHandler());
         // handlerMap.put("DES", new EncryptHandler());
         // handlerMap.put("DESede", new EncryptHandler());
         // handlerMap.put("Blowfish", new EncryptHandler());
@@ -607,8 +607,8 @@ public class EncodeTool extends SwingTool {
 		vec.add("ECB");
 		vec.add("OFB");
 		vec.add("GCM");
-		
-		modeList = new JComboBox(vec);
+
+		modeList = new JComboBox<String>(vec);
 		modeList.setFont(displayFont);
 		modeList.setEditable(true);
         modeList.setSelectedIndex(2);
@@ -621,7 +621,7 @@ public class EncodeTool extends SwingTool {
         vec.add("NoPadding");
 		vec.add("ISO10126Padding");
 		vec.add("SSL3Padding");
-		paddingList = new JComboBox(vec);
+		paddingList = new JComboBox<String>(vec);
 		paddingList.setFont(displayFont);
 		paddingList.setEditable(true);
         paddingList.setSelectedIndex(1);
@@ -634,7 +634,7 @@ public class EncodeTool extends SwingTool {
 		    vec.add(entry.getKey());  
 		}
 
-		algorithmList = new JComboBox(vec);
+		algorithmList = new JComboBox<String>(vec);
 		algorithmList.setFont(displayFont);
 		algorithmList.setEditable(true);
         algorithmList.setSelectedIndex(3);
@@ -735,6 +735,7 @@ public class EncodeTool extends SwingTool {
 			spec = spec + "/" + padding;
 		}
 		//SwingUtils.alert(spec);
+        spec = spec.replace("-Base64", "");
 		return spec;
 	}
 
