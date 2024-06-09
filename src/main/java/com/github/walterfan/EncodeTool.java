@@ -360,7 +360,7 @@ public class EncodeTool extends SwingTool {
             }
         });
 
-        handlerMap.put("OldParameterBase64", new EncodeHandler() {
+        handlerMap.put("ParameterBase64", new EncodeHandler() {
             public String convert(String text) throws Exception {
                 return ParamUtils.encode(text.trim());
             }
@@ -461,9 +461,8 @@ public class EncodeTool extends SwingTool {
         });
 
         handlerMap.put("AES-Base64", new EncryptHandler());
-        // handlerMap.put("DES", new EncryptHandler());
-        // handlerMap.put("DESede", new EncryptHandler());
-        // handlerMap.put("Blowfish", new EncryptHandler());
+        handlerMap.put("DES", new EncryptHandler());
+        handlerMap.put("Blowfish", new EncryptHandler());
 
         handlerMap.put("NTPTimestamp-String", new EncodeHandler() {
             public String convert(String text) throws Exception {
